@@ -9,18 +9,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#157878">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../style.css">
 	  <link rel="shortcut icon" type="image/png" href="https://gopro.github.io/labs/assets/images/favicon.png">
   </head>
   <body>
-    <a id="skip-to-content" href="#content">Skip to the content.</a>
-
     <main id="content" class="main-content" role="main">
       <h1 id="precision-date-and-time-utc">Precision Date and Time (UTC)</h1>
 
-<script src="./jquery.min.js"></script>
+<script src="../jquery.min.js"></script>
 
-<script src="./qrcodeborder.js"></script>
+<script src="../qrcodeborder.js"></script>
 
 <style>
         #qrcode{
@@ -94,8 +92,14 @@ function padTime1000(i) {
   else if (i < 10) {i = "00" + i;}  // add zero in front of numbers < 10
   return i;
 }
-function timeLoop()
+function timeLoop(prevTime)
 {
+  var currTime = Date.now()
+  // exactly 60fps
+  if ((currTime - prevTime) < 16){
+    requestAnimationFrame(function (){timeLoop(prevTime)});
+    return;
+  }
   var today;
   var yy,mm,dd,h,m,s;
   var ms;
@@ -117,14 +121,13 @@ function timeLoop()
   //ms = Math.floor(ms / 10); // hundredths
   ms = padTime1000(ms);
 
-  // cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTI" + id;
-  cmd = "#" + yy + mm + dd + h + m + s + "." + ms
+  cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTI" + id;
+  // cmd = "#" + yy + mm + dd + h + m + s + "." + ms
   qrcode.clear(); 
   qrcode.makeCode(cmd);
   document.getElementById("qrtext").innerHTML = cmd;
  
-  //var t = setTimeout(timeLoop, 30);
-  requestAnimationFrame(timeLoop);
+  requestAnimationFrame(function (){timeLoop(currTime)});
 }
 
 function myReloadFunction() {
@@ -132,7 +135,7 @@ function myReloadFunction() {
 }
 
 makeQR();
-timeLoop();
+timeLoop(Date.now());
 
 </script>
 
