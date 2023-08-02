@@ -32,6 +32,10 @@
 
 <p>Simply point your Labs enabled camera at this animated QR Code, to set your date and time very accurately to UTC time. This is particularly useful for multi-camera shoots, as it helps synchronize the timecode between cameras. As the camera’s internal clock will drift slowly over time, use this QR Code just before your multi-camera shoot for the best synchronization.</p>
 
+<p><strong>Refresh Rate</strong> <input type="range" id="fpsid" name="fpsid" min="10" max="120" value="30" style="width: 300px;" /><label for="fpsid"></label>  <b id="fpstext"></b> FPS</p>
+
+<p><strong>QR Command Set Time</strong> <input type="checkbox" id="qrid" name="qrid" checked="true"/> <label for="qrid">Active</label><br /></p>
+
 <center>
 <div id="qrcode"></div>
 <br />
@@ -94,9 +98,15 @@ function padTime1000(i) {
 }
 function timeLoop(prevTime)
 {
+  if(document.getElementById("fpsid") !== null)
+  {
+	fps = parseInt(document.getElementById("fpsid").value);	
+  document.getElementById("fpstext").innerHTML = fps;
+  }
+
   var currTime = Date.now()
   // exactly 60fps
-  if ((currTime - prevTime) < 16){
+  if ((currTime - prevTime) < 1000./fps){
     requestAnimationFrame(function (){timeLoop(prevTime)});
     return;
   }
@@ -121,8 +131,15 @@ function timeLoop(prevTime)
   //ms = Math.floor(ms / 10); // hundredths
   ms = padTime1000(ms);
 
-  cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTI" + id;
-  // cmd = "#" + yy + mm + dd + h + m + s + "." + ms
+  var set_time = true;
+  if(document.getElementById("qrid") !== null)
+  {
+    set_time = document.getElementById("qrid").checked;
+  }
+  cmd = "#" + yy + mm + dd + h + m + s + "." + ms;
+  if(set_time){
+    cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTI" + id;
+  }
   qrcode.clear(); 
   qrcode.makeCode(cmd);
   document.getElementById("qrtext").innerHTML = cmd;

@@ -30,9 +30,13 @@
         }
 </style>
 
+<p><strong>Refresh Rate</strong> <input type="range" id="fpsid" name="fpsid" min="10" max="120" value="30" style="width: 300px;" /><label for="fpsid"></label>  <b id="fpstext"></b> FPS</p>
+
 <p><strong>Timezone</strong> <input type="range" id="tzid" name="tzid" min="-48" max="56" value="0" style="width: 300px;" /><label for="tzid"></label>  <b id="tztext"></b> hour <b id="tzmin"></b> minute<br /></p>
 
 <p><strong>Daylight Saving Time</strong> <input type="checkbox" id="tdid" name="tdid" /> <label for="tdid">Active</label><br /></p>
+
+<p><strong>QR Command Set Time</strong> <input type="checkbox" id="qrid" name="qrid" checked="true"/> <label for="qrid">Active</label><br /></p>
 
 <p>Simply point your Labs enabled camera at this animated QR Code, to set your date and time very accurately to local time. This is particularly useful for multi-camera shoots, as it helps synchronize the timecode between cameras. As the camera’s internal clock will drift slowly over time, use this QR Code just before your multi-camera shoot for the best synchronization.</p>
 
@@ -130,9 +134,16 @@ function padTime1000(i) {
 }
 function timeLoop(prevTime)
 {
+
+  if(document.getElementById("fpsid") !== null)
+  {
+	fps = parseInt(document.getElementById("fpsid").value);	
+  document.getElementById("fpstext").innerHTML = fps;
+  }
+  
   var currTime = Date.now()
   // exactly 60fps
-  if ((currTime - prevTime) < 16){
+  if ((currTime - prevTime) < 1000./fps){
     requestAnimationFrame(function (){timeLoop(prevTime)});
     return;
   }
@@ -179,7 +190,15 @@ function timeLoop(prevTime)
 	}
   }
 
-  cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTD" + td + "oTZ" + tz + "oTI" + id;
+  var set_time = true;
+  if(document.getElementById("qrid") !== null)
+  {
+    set_time = document.getElementById("qrid").checked;
+  }
+  cmd = "#" + yy + mm + dd + h + m + s + "." + ms;
+  if(set_time){
+    cmd = "oT" + yy + mm + dd + h + m + s + "." + ms + "oTD" + td + "oTZ" + tz + "oTI" + id;
+  }
   qrcode.clear(); 
   qrcode.makeCode(cmd);
   document.getElementById("qrtext").innerHTML = cmd;
